@@ -1,5 +1,5 @@
 {
-  "name": "tmconsulting/microservice-configuration",
+  "name": "microparts/configuration-php",
   "description": "A confugration module for PHP microservices.",
   "type": "library",
   "license": "MIT",
