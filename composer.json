@@ -1,0 +1,29 @@
+{
+  "name": "tmconsulting/microservice-configuration",
+  "description": "A confugration module for PHP microservices.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Shatilo Reymond",
+      "email": "shatilo.reymond@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tmconsulting\\": "src"
+    }
+  },
+  "require": {
+    "symfony/yaml": "^4.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.5"
+  },
+  "repositories": [
+      {
+        "type": "composer",
+        "url": "http://composer.tm-consulting.ru"
+      }
+  ]
+}
