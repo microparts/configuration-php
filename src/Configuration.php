@@ -240,7 +240,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
 
         if ($files === false) {
             $this->logger->debug('Glob does not walk to files, pattern:', $pattern);
-            throw new InvalidArgumentException();
+            throw new InvalidArgumentException("Glob does not walk to files, pattern: ${pattern}");
         }
 
         $this->logger->debug('Following config files found:', $files);
