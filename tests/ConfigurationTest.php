@@ -60,7 +60,6 @@ class ConfigurationTest extends TestCase
         putenv('STAGE=');
 
         $conf = new Configuration();
-        $conf->load();
 
         $this->assertSame('/app/configuration', $conf->getPath());
         $this->assertSame('local', $conf->getStage());
