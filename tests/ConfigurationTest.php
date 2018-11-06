@@ -1,87 +1,88 @@
 <?php
 
-namespace Tmconsulting\Configuration\Tests;
+namespace Microparts\Configuration\Tests;
 
-use Tmconsulting\Configuration;
+use Microparts\Configuration\Configuration;
 use PHPUnit\Framework\TestCase;
 
 class ConfigurationTest extends TestCase
 {
-    private function getDefaultConfigFixture()
+    /**
+     * @return array
+     */
+    public function getTrueMergedConfigurationForTestStage()
     {
         return [
-            'key' => 'value',
-            'key2' => 'value2',
-            'key3' => 'value3',
-            'extra' =>
-                [
-                    'key' => 'value',
-                    'key2' => 'value2',
-                    'key3' => 'value3',
+            'hotelbook_params' => [
+                'area_mapping' => [
+                    'KRK' => 'Krakow',
+                    'MSK' => 'Moscow',
+                    'CHB' => 'Челябинск',
                 ],
+                'url'          => 'https://hotelbook.com/xml_endpoint',
+                'username'     => 'TESt_USERNAME',
+                'password'     => 'PASSWORD',
+            ],
+            'logging'          => 'info',
+            'databases'        => [
+                'redis' => [
+                    'master' => [
+                        'username' => 'R_USER',
+                        'password' => 'R_PASS',
+                    ],
+                ],
+            ],
         ];
     }
 
-    private function getStageConfigFixture()
+    public function testConfigurationModuleFlowWithDefaultBehavior()
     {
-        return
-            [
-                'key4' => 'value4',
-                'key5' => 'value5',
-                'key6' => 'value6',
-                'extra' =>
-                    [
-                        'key' => 'value_overwrite',
-                        'key2' => 'value_overwrite2',
-                        'key3' => 'value_overwrite3',
-                    ]
-            ];
+        putenv('CONFIG_PATH=' . __DIR__ . '/configuration');
+        putenv('STAGE=test');
+
+        $conf = new Configuration();
+        $conf->load();
+
+        $this->followAssertions($conf);
     }
 
-    private function getMergedConfigFixture()
+    public function testConfigurationModuleFlowWithPassingPathAndStage()
     {
-        return [
-            'key' => 'value',
-            'key2' => 'value2',
-            'key3' => 'value3',
-            'key4' => 'value4',
-            'key5' => 'value5',
-            'key6' => 'value6',
-            'extra' =>
-                [
-                    'key' => 'value_overwrite',
-                    'key2' => 'value_overwrite2',
-                    'key3' => 'value_overwrite3',
-                ],
-        ];
+        $conf = new Configuration(__DIR__ . '/configuration', 'test');
+        $conf->load();
+
+        $this->followAssertions($conf);
     }
 
-    public function testConfigurationModuleFlow()
+    public function testDefaultPathAndValue()
     {
-        $mock = $this->getMockBuilder(Configuration::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['loadStage', 'loadDefaults'])
-            ->getMock();
+        putenv('CONFIG_PATH=');
+        putenv('STAGE=');
 
-        $mock->expects($this->once())
-            ->method('loadDefaults')
-            ->willReturn($this->getDefaultConfigFixture());
+        $conf = new Configuration();
+        $conf->load();
 
-        $mock->expects($this->once())
-            ->method('loadStage')
-            ->willReturn($this->getStageConfigFixture());
+        $this->assertSame('/app/configuration', $conf->getPath());
+        $this->assertSame('local', $conf->getStage());
 
-        $mock->__construct();
+        $conf->setPath('./config');
+        $conf->setStage('prod');
 
-        $this->assertEquals($this->getMergedConfigFixture(), $mock->getAll());
+        $this->assertSame('./config', $conf->getPath());
+        $this->assertSame('prod', $conf->getStage());
     }
 
-    public function testConfigurationModule()
+    /**
+     * @param \Microparts\Configuration\Configuration $conf
+     */
+    private function followAssertions(Configuration $conf)
     {
-        $configuration = new Configuration();
+        $array = $this->getTrueMergedConfigurationForTestStage();
 
-        $this->assertNotEmpty($configuration->getAll());
-        $this->assertNotEmpty($configuration->get('key'));
-        $this->assertEmpty($configuration->get('empty_something'));
+        $this->assertSame($array, $conf->all());
+        $this->assertSame($array['hotelbook_params'], $conf->get('hotelbook_params'));
+        $this->assertTrue(isset($conf['hotelbook_params']));
+        $this->assertSame($array['hotelbook_params']['area_mapping'], $conf->get('hotelbook_params.area_mapping'));
+        $this->assertSame($array['hotelbook_params']['area_mapping'], $conf['hotelbook_params.area_mapping']);
     }
 }
