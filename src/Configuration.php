@@ -3,6 +3,7 @@
 namespace Microparts\Configuration;
 
 use ArrayAccess;
+use InvalidArgumentException;
 use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
@@ -234,12 +235,18 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
      */
     protected function parseConfiguration($stage = 'defaults')
     {
-        $array = glob($this->getPath() . '/' . $stage . '/*.yaml', GLOB_NOSORT | GLOB_ERR);
+        $pattern = $this->getPath() . '/' . $stage . '/*.yaml';
+        $files = glob($pattern, GLOB_NOSORT | GLOB_ERR);
+
+        if ($files === false) {
+            $this->logger->debug('Glob does not walk to files, pattern:', $pattern);
+            throw new InvalidArgumentException();
+        }
+
+        $this->logger->debug('Following config files found:', $files);
+
         $config = [];
-
-        $this->logger->debug('Following config files found:', $array);
-
-        foreach ($array as $filename) {
+        foreach ($files as $filename) {
             $yamlFileContent = $this->parseYamlFile($filename);
 
             if (empty($yamlFileContent)) {
