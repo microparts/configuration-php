@@ -10,13 +10,6 @@ namespace Microparts\Configuration;
 interface ConfigurationInterface
 {
     /**
-     * Load the app configuration.
-     * 
-     * @return static
-     */
-    public function load();
-
-    /**
      * Get's a value from config by dot notation
      * E.g get('x.y', 'foo') => returns the value of $config['x']['y']
      * And if not exist, return 'foo'
