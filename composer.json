@@ -19,7 +19,6 @@
     }
   },
   "require": {
-    "ext-yaml": "*",
     "symfony/yaml": "^4.1",
     "psr/log": "^1.0"
   },
