@@ -2,6 +2,7 @@
 
 namespace Microparts\Configuration\Tests;
 
+use Exception;
 use Microparts\Configuration\Configuration;
 use PHPUnit\Framework\TestCase;
 
@@ -83,5 +84,25 @@ class ConfigurationTest extends TestCase
         $this->assertTrue(isset($conf['hotelbook_params']));
         $this->assertSame($array['hotelbook_params']['area_mapping'], $conf->get('hotelbook_params.area_mapping'));
         $this->assertSame($array['hotelbook_params']['area_mapping'], $conf['hotelbook_params.area_mapping']);
+    }
+
+    public function testHowConfigurationMergeArrays()
+    {
+        $config = [
+            'content_security_policy' => [
+                'default-src \'self\' cdn.example.com',
+                'img-src \'self\' img.example.com'
+            ]
+        ];
+
+        try {
+            $conf = new Configuration(__DIR__ . '/configuration_bug1', 'test');
+            $conf->load();
+
+            $this->assertSame($config, $conf->all());
+        } catch (Exception $e) {
+            // Undefined index 0 when checking is_array($base[$key]).
+            $this->assertFalse((bool) $e);
+        }
     }
 }
