@@ -25,6 +25,10 @@ class ConfigurationTest extends TestCase
                 'password'     => 'PASSWORD',
             ],
             'logging'          => 'info',
+            'default_list'     => [
+                'bar',
+                'baz'
+            ],
             'databases'        => [
                 'redis' => [
                     'master' => [
@@ -86,7 +90,7 @@ class ConfigurationTest extends TestCase
         $this->assertSame($array['hotelbook_params']['area_mapping'], $conf['hotelbook_params.area_mapping']);
     }
 
-    public function testHowConfigurationMergeArrays()
+    public function testHowConfigurationMergeArraysWithEmpty()
     {
         $config = [
             'content_security_policy' => [
@@ -98,11 +102,30 @@ class ConfigurationTest extends TestCase
         try {
             $conf = new Configuration(__DIR__ . '/configuration_bug1', 'test');
             $conf->load();
-
-            $this->assertSame($config, $conf->all());
         } catch (Exception $e) {
             // Undefined index 0 when checking is_array($base[$key]).
             $this->assertFalse((bool) $e);
         }
+
+        $this->assertSame($config, $conf->all());
+    }
+
+    public function testHowConfigurationMergeArrays()
+    {
+        $config = [
+            'content_security_policy' => [
+                'default-src \'self\' cdn.example.com',
+                'img-src \'self\' img.example.com'
+            ]
+        ];
+
+        try {
+            $conf = new Configuration(__DIR__ . '/configuration_bug2', 'test');
+            $conf->load();
+        } catch (Exception $e) {
+            $this->assertFalse((bool) $e);
+        }
+
+        $this->assertSame($config, $conf->all());
     }
 }

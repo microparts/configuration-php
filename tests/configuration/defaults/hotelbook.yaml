@@ -5,6 +5,8 @@ defaults: # Stage "defaults" - место хранения значений по
       MSK: Moscow
       CHB: Челябинск
   logging: debug
+  default_list:
+    - foo
 
 shared:
   agents_id:

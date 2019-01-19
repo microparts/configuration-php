@@ -217,7 +217,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         $this->logger->info(self::CONFIG_PATH . ' = ' . $this->getPath());
         $this->logger->info(self::STAGE . ' = ' . $this->getStage());
 
-        $this->config = $this->arrayMergeRecursiveDistinct(
+        $this->config = $this->arrayMergeRecursive(
             $this->parseConfiguration(),
             $this->parseConfiguration($this->getStage())
         );
@@ -255,7 +255,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
                 continue;
             }
 
-            $config = $this->arrayMergeRecursiveDistinct($config, current($yamlFileContent));
+            $config = $this->arrayMergeRecursive($config, current($yamlFileContent));
         }
 
         return $config;
@@ -289,17 +289,13 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
     }
 
     /**
-     * Merges any number of arrays / parameters recursively, replacing
-     * entries with string keys with values from latter arrays.
-     * If the entry or the next value to be assigned is an array, then it
-     * automagically treats both arguments as an array.
-     * Numeric entries are appended, not replaced, but only if they are
-     * unique
+     * Works like array_merge_recursive_distinct,
+     * but not merge sequential list.
      *
      * @param array ...$arrays
      * @return array|mixed
      */
-    private function arrayMergeRecursiveDistinct(array ...$arrays)
+    private function arrayMergeRecursive(array ...$arrays)
     {
         $base = array_shift($arrays);
         if ( ! is_array($base)) {
@@ -316,8 +312,8 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
                     continue;
                 }
 
-                if (is_array($value) || (isset($base[$key]) && is_array($base[$key]))) {
-                    $base[$key] = $this->arrayMergeRecursiveDistinct($base[$key], $append[$key]);
+                if ((is_array($value) || (isset($base[$key]) && is_array($base[$key]))) && $this->isAssoc($value)) {
+                    $base[$key] = $this->arrayMergeRecursive($base[$key], $append[$key]);
                 } else {
                     if (is_numeric($key)) {
                         if ( ! in_array($value, $base)) {
@@ -331,5 +327,20 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         }
 
         return $base;
+    }
+
+    /**
+     * Check if array is associative or sequential list.
+     *
+     * @param array $array
+     * @return bool
+     */
+    private function isAssoc(array $array): bool
+    {
+        if ($array === []) {
+            return false;
+        }
+
+        return array_keys($array) !== range(0, count($array) - 1);
     }
 }
