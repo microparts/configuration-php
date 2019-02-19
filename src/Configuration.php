@@ -313,7 +313,10 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
                 }
 
                 if ((is_array($value) || (isset($base[$key]) && is_array($base[$key]))) && $this->isAssoc($value)) {
-                    $base[$key] = $this->arrayMergeRecursive((array) $base[$key], $append[$key]);
+                    $base[$key] = $this->arrayMergeRecursive(
+                        (array) $base[$key],
+                        (array) $append[$key]
+                    );
                 } else {
                     if (is_numeric($key)) {
                         if ( ! in_array($value, $base)) {
