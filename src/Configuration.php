@@ -238,7 +238,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         $pattern = $this->getPath() . '/' . $stage . '/*.yaml';
         $files = glob($pattern, GLOB_NOSORT | GLOB_ERR);
 
-        if ($files === false) {
+        if ($files === false || count($files) < 1) {
             $message = "Glob does not walk to files, pattern: {$pattern}. Path is correct?";
             $this->logger->info($message);
             throw new InvalidArgumentException($message);
