@@ -9,7 +9,7 @@ for follow up corporate standards of application configuration.
 ## Installation
 
 ```bash
-composer install microparts/configuration-php
+composer require microparts/configuration-php
 ```
 
 ## Usage
