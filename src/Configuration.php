@@ -109,7 +109,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
      */
     public function setPath(?string $path): Configuration
     {
-        $this->path = $path;
+        $this->path = realpath($path);
 
         return $this;
     }
