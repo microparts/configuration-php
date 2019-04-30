@@ -8,7 +8,6 @@ use LogicException;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
-use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
 /**
@@ -16,9 +15,21 @@ use Symfony\Component\Yaml\Yaml;
  *
  * @package Microparts\Configuration
  */
-class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareInterface
+final class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareInterface
 {
     use LoggerAwareTrait;
+
+    /**
+     * Possible path's of configuration.
+     *
+     * @var array
+     */
+    private static $possibleLocations = [
+        '/app/configuration',
+        '/configuration',
+        './configuration',
+        __DIR__ . '/../configuration',
+    ];
 
     /**
      * Name of CONFIG_PATH variable
@@ -29,6 +40,16 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
      * Name of stage ENV variable
      */
     private const STAGE = 'STAGE';
+
+    /**
+     * Default configuration stage
+     */
+    private const DEFAULT_STAGE = 'defaults';
+
+    /**
+     * Default config location.
+     */
+    private const DEFAULT_CONFIG_PATH = '/app/configuration';
 
     /**
      * Config tree goes here
@@ -54,13 +75,13 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
     public function __construct(?string $path = null, ?string $stage = null)
     {
         if (null === $path) {
-            $this->setPath($this->getEnvVariable(self::CONFIG_PATH, '/app/configuration'));
+            $this->setPath($this->getEnvVariable(self::CONFIG_PATH, self::DEFAULT_CONFIG_PATH));
         } else {
             $this->setPath($path);
         }
 
         if (null === $stage) {
-            $this->setStage($this->getEnvVariable(self::STAGE, 'local'));
+            $this->setStage($this->getEnvVariable(self::STAGE, self::DEFAULT_STAGE));
         } else {
             $this->setStage($stage);
         }
@@ -69,6 +90,18 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         // If u want to see logs and see how load process working,
         // change it from outside to your default logger object in you application
         $this->setLogger(new NullLogger());
+    }
+
+    /**
+     * Automatically find configuration in possible paths.
+     * Specially for lazy-based programmers like me.
+     *
+     * @param string|null $stage
+     * @return Configuration
+     */
+    public static function auto(?string $stage = null)
+    {
+        return new Configuration(self::findDirectories(), $stage);
     }
 
     /**
@@ -105,7 +138,7 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
      * Set the configuration path
      *
      * @param null|string $path
-     * @return \Microparts\Configuration\Configuration
+     * @return Configuration
      */
     public function setPath(?string $path): Configuration
     {
@@ -217,14 +250,35 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         $this->logger->info(self::CONFIG_PATH . ' = ' . $this->getPath());
         $this->logger->info(self::STAGE . ' = ' . $this->getStage());
 
+        if ($this->getPath() !== self::DEFAULT_CONFIG_PATH) {
+            $message = 'Please use default [%s] configuration location instead of [%s]. If you use configuration locally, ignore this message.';
+            $this->logger->warning(sprintf($message, self::DEFAULT_CONFIG_PATH, $this->getPath()));
+        }
+
+        $second = $this->getStage() !== self::DEFAULT_STAGE
+            ? $this->parseConfiguration($this->getStage())
+            : [];
+
         $this->config = $this->arrayMergeRecursive(
             $this->parseConfiguration(),
-            $this->parseConfiguration($this->getStage())
+            $second
         );
 
-        $this->logger->info('Configuration module loaded');
+        $this->logger->info('Configuration loaded.');
 
         return $this;
+    }
+
+    /**
+     * For debug only.
+     *
+     * @param int $inline
+     * @param int $indent
+     * @return string
+     */
+    public function dump(int $inline = 10, int $indent = 2): string
+    {
+        return PHP_EOL . Yaml::dump($this->all(), $inline, $indent);
     }
 
     /**
@@ -233,14 +287,13 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
      * @param string $stage
      * @return array
      */
-    protected function parseConfiguration($stage = 'defaults')
+    private function parseConfiguration(string $stage = self::DEFAULT_STAGE)
     {
         $pattern = $this->getPath() . '/' . $stage . '/*.yaml';
-        $files = glob($pattern, GLOB_NOSORT | GLOB_ERR);
+        $files   = glob($pattern, GLOB_NOSORT | GLOB_ERR);
 
         if ($files === false || count($files) < 1) {
             $message = "Glob does not walk to files, pattern: {$pattern}. Path is correct?";
-            $this->logger->info($message);
             throw new InvalidArgumentException($message);
         }
 
@@ -248,42 +301,31 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
 
         $config = [];
         foreach ($files as $filename) {
-            $yamlFileContent = $this->parseYamlFile($filename);
+            $content   = Yaml::parseFile($filename);
+            $directory = basename(pathinfo($filename, PATHINFO_DIRNAME));
+            $top       = key($content);
 
-            if (empty($yamlFileContent)) {
-                $this->logger->debug("Parse error while reading file: {$filename}, skip it.");
-                continue;
+            if ($directory !== $top) {
+                $message = 'Invalid! Stage of config directory [%s] is not equals top of yaml content [%s].';
+                throw new InvalidArgumentException(sprintf($message, $directory, $top));
             }
 
-            $config = $this->arrayMergeRecursive($config, current($yamlFileContent));
+            $this->logger->debug(sprintf('Config %s/%s [top=%s] is fine.', $directory, basename($filename), $top));
+
+            $config = $this->arrayMergeRecursive($config, current($content));
         }
 
         return $config;
     }
 
     /**
-     * Parses the yaml file
-     *
-     * @param $path
-     * @return array|mixed
-     */
-    protected function parseYamlFile($path)
-    {
-        try {
-            return Yaml::parseFile($path);
-        } catch (ParseException $e) {
-            return [];
-        }
-    }
-
-    /**
      * Takes an env variable and returns default if not exist
      *
-     * @param $variable
-     * @param $default
-     * @return array|false|string
+     * @param string $variable
+     * @param string $default
+     * @return string
      */
-    protected function getEnvVariable($variable, $default)
+    private static function getEnvVariable(string $variable, string $default = '')
     {
         return getenv($variable) ?: $default;
     }
@@ -345,5 +387,29 @@ class Configuration implements ConfigurationInterface, ArrayAccess, LoggerAwareI
         }
 
         return array_keys($array) !== range(0, count($array) - 1);
+    }
+
+    /**
+     * Automatically find configuration in possible paths.
+     *
+     * @return string
+     */
+    private static function findDirectories(): string
+    {
+        if ($value = trim((string) self::getEnvVariable(self::CONFIG_PATH))) {
+            // add env config path to top of possible locations.
+            array_unshift(self::$possibleLocations, $value);
+        }
+
+        foreach (self::$possibleLocations as $path) {
+            if (($location = realpath($path)) !== false) {
+                return $location;
+            }
+        }
+
+        throw new LogicException(sprintf(
+            'Configuration directory not found in known path\'s: %s',
+            join(',', self::$possibleLocations)
+        ));
     }
 }
