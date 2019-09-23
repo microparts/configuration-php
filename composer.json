@@ -13,6 +13,7 @@
       "email": "shatilo.reymond@gmail.com"
     }
   ],
+  "bin": ["bin/st-conf"],
   "autoload": {
     "psr-4": {
       "Microparts\\Configuration\\": "src"

@@ -74,6 +74,66 @@ $conf->get('key'); // full example on the top
 
 That all.
 
+## CLI utility
+
+Also, you can install simple small cli-utility to dump total results of merged config.
+It possible with multiple ways:
+
+1) Install to `/usr/local/bin` as global binary
+
+```bash  
+L=/usr/local/bin/st-conf && sudo curl -L https://github.com/microparts/configuration-php/releases/download/2.2.0/st-conf.phar -o $L && sudo chmod +x $L
+```
+
+2) Install library as global composer requirements
+
+First step:
+```bash
+composer global require microparts/configuration-php
+```
+
+It will be installed to `~/.composer` directory.
+
+If you have `~/.composer/vendor/bin` in globals path, you can try run command:  
+```bash
+st-conf help dump
+```
+
+Otherwise you can be register that directory:
+```bash
+echo 'export PATH=~/.composer/vendor/bin:$PATH' >> ~/.bash_profile
+source ~/.bash_profile
+```
+
+### CLI Usage
+
+```bash
+Description:
+  Dump loaded configuration
+
+Usage:
+  dump [options] [--] [<path> [<stage>]]
+
+Arguments:
+  path                   Configuration directory path
+  stage                  Configuration $STAGE
+
+Options:
+  -l, --inline[=INLINE]  The level where you switch to inline YAML [default: 10]
+  -s, --indent[=INDENT]  The amount of spaces to use for indentation of nested nodes [default: 2]
+  -d, --debug            Debug
+  -h, --help             Display this help message
+  -q, --quiet            Do not output any message
+  -V, --version          Display this application version
+      --ansi             Force ANSI output
+      --no-ansi          Disable ANSI output
+  -n, --no-interaction   Do not ask any interactive question
+  -v|vv|vvv, --verbose   Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+
+Help:
+  Example of usage: `st-conf dump`. Options --inline=10 (nesting level) and --indent=2. If [path] and [stage] arguments not passed will be used global env variables CONFIG_PATH and STAGE.
+```
+
 ## Depends
 
 * \>= PHP 7.1
@@ -83,7 +143,7 @@ That all.
 
 The MIT License
 
-Copyright © 2019 teamc.io, Inc. https://teamc.io
+Copyright © 2019 spacetab.io, Inc. https://spacetab.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
