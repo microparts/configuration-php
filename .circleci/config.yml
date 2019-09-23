@@ -35,7 +35,7 @@ jobs:
       - run: vendor/bin/box compile
       # store artifact
       - store_artifacts:
-        destination: bin/st-conf.phar
+          destination: bin/st-conf.phar
 
   publish-github-release:
     docker:
