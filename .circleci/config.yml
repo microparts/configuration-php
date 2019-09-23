@@ -34,22 +34,22 @@ jobs:
       # compile phar archive
       - run: vendor/bin/box compile
       # store artifact
-      - store_artifacts:
-          path: bin/st-conf.phar
-          destination: st-conf.phar
+#      - store_artifacts:
+#          path: bin/st-conf.phar
+#          destination: st-conf.phar
 
   publish-github-release:
     docker:
       - image: cibuilds/github:0.10
     steps:
       - attach_workspace:
-          at: bin/st-conf.phar
+          at: /tmp
       - run:
           name: "Publish Release on GitHub"
           command: |
             VERSION=1.0.0
-            ls -la
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} bin/st-conf.phar
+            ls -la /tmp
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/bin/st-conf.phar
 
 workflows:
   version: 2
