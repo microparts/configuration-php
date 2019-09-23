@@ -35,8 +35,8 @@ jobs:
       - run: vendor/bin/box compile
       # store artifact
       - store_artifacts:
-          path: bin/
-          destination: bin/st-conf.phar
+          path: bin/st-conf.phar
+          destination: st-conf.phar
 
   publish-github-release:
     docker:
@@ -48,6 +48,7 @@ jobs:
           name: "Publish Release on GitHub"
           command: |
             VERSION=1.0.0
+            ls -la
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} bin/st-conf.phar
 
 workflows:
