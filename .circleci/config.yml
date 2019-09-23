@@ -7,27 +7,21 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/php:7.3-browsers-legacy
+      - image: circleci/php:7.3-browsers
 
     working_directory: ~/repo
 
     steps:
-      - checkout
-
       # Download and cache dependencies
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "composer.json" }}
-#            # fallback to using the latest cache if no exact match is found
-#            - v1-dependencies-
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ .Branch }}-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-{{ .Branch }}-
+            - v1-dependencies-
 
+      - checkout
       - run: composer install -n --prefer-dist
-
-#      - save_cache:
-#          paths:
-#            - ./vendor
-#          key: v1-dependencies-{{ checksum "composer.json" }}
-
       # run tests!
       - run: vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
@@ -37,6 +31,11 @@ jobs:
           root: .
           paths:
             - bin/
+      - save_cache:
+          paths:
+            - ./vendor
+          key: v1-dependencies-{{ checksum "composer.json" }}
+
 
   publish-github-release:
     docker:
