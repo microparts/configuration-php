@@ -13,7 +13,21 @@ jobs:
 
     steps:
       - checkout
+
+      # Download and cache dependencies
+#      - restore_cache:
+#          keys:
+#            - v1-dependencies-{{ checksum "composer.json" }}
+#            # fallback to using the latest cache if no exact match is found
+#            - v1-dependencies-
+
       - run: composer install -n --prefer-dist
+
+#      - save_cache:
+#          paths:
+#            - ./vendor
+#          key: v1-dependencies-{{ checksum "composer.json" }}
+
       # run tests!
       - run: vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
@@ -45,6 +59,5 @@ workflows:
             - build
           filters:
             branches:
-              only: master
-            tags:
-              only: /^\d+\.\d+\.\d+$/
+              only:
+                - master
