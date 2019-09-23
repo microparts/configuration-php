@@ -54,5 +54,15 @@ workflows:
   version: 2
   total:
     jobs:
-      - build
-      - publish-github-release
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+      - publish-github-release:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
