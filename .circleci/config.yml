@@ -13,7 +13,8 @@ jobs:
 
     steps:
       - checkout
-      - run: composer install -n --prefer-dist
+      #--prefer-dist
+      - run: composer install -n
       # run tests!
       - run: vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
