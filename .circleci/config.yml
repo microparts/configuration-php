@@ -15,18 +15,18 @@ jobs:
       - checkout
 
       # Download and cache dependencies
-#      - restore_cache:
-#          keys:
-#            - v1-dependencies-{{ checksum "composer.json" }}
-#            # fallback to using the latest cache if no exact match is found
-#            - v1-dependencies-
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "composer.json" }}
+            # fallback to using the latest cache if no exact match is found
+            - v1-dependencies-
 
       - run: composer install -n --prefer-dist
 
-#      - save_cache:
-#          paths:
-#            - ./vendor
-#          key: v1-dependencies-{{ checksum "composer.json" }}
+      - save_cache:
+          paths:
+            - ./vendor
+          key: v1-dependencies-{{ checksum "composer.json" }}
 
       # run tests!
       - run: vendor/bin/phpunit --coverage-clover=coverage.xml
@@ -47,22 +47,18 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=1.0.0
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} /tmp/bin/st-conf.phar
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/bin/st-conf.phar
 
 workflows:
   version: 2
   total:
     jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - master
+      - build
       - publish-github-release:
           requires:
             - build
           filters:
             branches:
-              only:
-                - master
+              ignore: /.*/
+            tags:
+              only: /^\d+\.\d+\.\d+$/
