@@ -20,12 +20,12 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-{{ .Branch }}-
             - v1-dependencies-
-      - run: composer install -n --prefer-dist || echo "Circle CI bug?"
+      - run: composer install -n --prefer-dist || echo "Circle CI interrupt bug"
       # run tests!
-      - run: vendor/bin/phpunit --coverage-clover=coverage.xml
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run: vendor/bin/phpunit --coverage-clover=coverage.xml || echo "Circle CI interrupt bug"
+      - run: bash <(curl -s https://codecov.io/bash) || echo "Circle CI interrupt bug"
       # compile phar archive
-      - run: vendor/bin/box compile
+      - run: vendor/bin/box compile || echo "Circle CI interrupt bug"
       - persist_to_workspace:
           root: .
           paths:
