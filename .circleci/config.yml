@@ -34,7 +34,7 @@ jobs:
       # compile phar archive
       - run: vendor/bin/box compile
       - persist_to_workspace:
-          root: workspace
+          root: .
           paths:
             - bin/
       # store artifact
