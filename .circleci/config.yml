@@ -26,10 +26,12 @@ jobs:
       - run: bash <(curl -s https://codecov.io/bash) || echo "Circle CI interrupt bug"
       # compile phar archive
       - run: vendor/bin/box compile || echo "Circle CI interrupt bug"
+      - run: echo "$(git describe --tags $(git rev-list --tags --max-count=1))" > ./version
       - persist_to_workspace:
           root: .
           paths:
             - bin/
+            - version
       - save_cache:
           paths:
             - ./vendor
@@ -45,7 +47,7 @@ jobs:
       - run:
           name: "Publish Release on GitHub"
           command: |
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} /tmp/bin/st-conf.phar
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete $(cat /tmp/version) /tmp/bin/st-conf.phar
 
 workflows:
   version: 2
