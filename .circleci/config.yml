@@ -49,3 +49,10 @@ jobs:
           command: |
             VERSION=1.0.0
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} bin/st-conf.phar
+
+workflows:
+  version: 2
+  total:
+    jobs:
+      - build
+      - publish-github-release
