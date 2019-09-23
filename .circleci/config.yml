@@ -35,6 +35,7 @@ jobs:
       - run: vendor/bin/box compile
       # store artifact
       - store_artifacts:
+          path: bin/
           destination: bin/st-conf.phar
 
   publish-github-release:
