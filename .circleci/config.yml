@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       # specify the version you desire here
-      - image: circleci/php:7.3-browsers
+      - image: circleci/php:7.3-browsers-legacy
 
     working_directory: ~/repo
 
