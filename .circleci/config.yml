@@ -20,7 +20,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-{{ .Branch }}-
             - v1-dependencies-
-      - run: composer install -n --prefer-dist
+      - run: composer install -n --prefer-dist || echo "Circle CI bug?"
       # run tests!
       - run: vendor/bin/phpunit --coverage-clover=coverage.xml
       - run: bash <(curl -s https://codecov.io/bash)
