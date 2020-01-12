@@ -81,7 +81,7 @@ It possible with multiple ways:
 
 1) Install to `/usr/local/bin` as global binary
 
-```bash  
+```bash
 L=/usr/local/bin/st-conf && sudo curl -L https://github.com/microparts/configuration-php/releases/download/2.2.0/st-conf.phar -o $L && sudo chmod +x $L
 ```
 
@@ -94,7 +94,7 @@ composer global require microparts/configuration-php
 
 It will be installed to `~/.composer` directory.
 
-If you have `~/.composer/vendor/bin` in globals path, you can try run command:  
+If you have `~/.composer/vendor/bin` in globals path, you can try run command:
 ```bash
 st-conf help dump
 ```
@@ -143,7 +143,7 @@ Help:
 
 The MIT License
 
-Copyright © 2019 spacetab.io, Inc. https://spacetab.io
+Copyright © 2020 spacetab.io, Inc. https://spacetab.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
