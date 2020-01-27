@@ -14,8 +14,8 @@ interface ConfigurationInterface
      * E.g get('x.y', 'foo') => returns the value of $config['x']['y']
      * And if not exist, return 'foo'
      *
-     * @param $key
-     * @param null $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
     public function get($key, $default = null);
