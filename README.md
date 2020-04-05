@@ -4,6 +4,10 @@ PHP Microservice configuration module
 [![CircleCI](https://circleci.com/gh/microparts/configuration-php/tree/master.svg?style=svg)](https://circleci.com/gh/microparts/configuration-php/tree/master)
 [![codecov](https://codecov.io/gh/microparts/configuration-php/branch/master/graph/badge.svg)](https://codecov.io/gh/microparts/configuration-php)
 
+THIS PACKAGE PERMANENTLY MOVED TO https://github.com/spacetab-io/configuration-php
+
+______
+
 Configuration module for microservices written on PHP. Specially created
 for follow up corporate standards of application configuration.
 
